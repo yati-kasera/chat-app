@@ -28,7 +28,8 @@ export class ChatGateway implements OnGatewayConnection {
     // Populate the sender field
     const populatedMessage = await savedMessage.populate('sender', 'username');
     // Emit the message to both sender and recipient rooms
-    this.server.to(data.sender).to(data.recipient).emit('private-message', populatedMessage.toObject());
+    // this.server.to(data.sender).to(data.recipient).emit('private-message', populatedMessage.toObject());
+    void this.server.to(data.sender).to(data.recipient).emit('private-message', populatedMessage.toObject());
   }
 
   @SubscribeMessage('group-message')
@@ -41,24 +42,33 @@ export class ChatGateway implements OnGatewayConnection {
     // Populate the sender field
     const populatedMessage = await savedMessage.populate('sender', 'username');
     // Emit the message to the group room
-    this.server.to(data.groupId).emit('group-message', populatedMessage.toObject());
+    // this.server.to(data.groupId).emit('group-message', populatedMessage.toObject());
+    void this.server.to(data.groupId).emit('group-message', populatedMessage.toObject());
   }
 
   @SubscribeMessage('join-group')
   async handleJoinGroup(
-    @MessageBody() data: { userId: string; groupId: string },
-    @ConnectedSocket() client: Socket
+    // @MessageBody() data: { userId: string; groupId: string },
+    // @ConnectedSocket() client: Socket
+    @MessageBody() data: { userId: string; groupId: string }
   ) {
-    client.join(data.groupId);
-    this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
+    // client.join(data.groupId);
+    // this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
+    // No need for client param
+    // Join the group room
+    // this.server.socketsJoin(data.groupId); // Not needed, handled by client.join
+    void this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
   }
 
   @SubscribeMessage('leave-group')
   async handleLeaveGroup(
-    @MessageBody() data: { userId: string; groupId: string },
-    @ConnectedSocket() client: Socket
+    // @MessageBody() data: { userId: string; groupId: string },
+    // @ConnectedSocket() client: Socket
+    @MessageBody() data: { userId: string; groupId: string }
   ) {
-    client.leave(data.groupId);
-    this.server.to(data.groupId).emit('user-left-group', { userId: data.userId, groupId: data.groupId });
+    // client.leave(data.groupId);
+    // this.server.to(data.groupId).emit('user-left-group', { userId: data.userId, groupId: data.groupId });
+    // No need for client param
+    void this.server.to(data.groupId).emit('user-left-group', { userId: data.userId, groupId: data.groupId });
   }
 } 

@@ -3,6 +3,10 @@ import { ChatService } from './chat.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ChatGateway } from './chat.gateway';
 
+interface JwtUserReq {
+  user: { userId: string; email: string; username: string };
+}
+
 @UseGuards(AuthGuard('jwt'))
 @Controller('chat')
 export class ChatController {
@@ -13,7 +17,7 @@ export class ChatController {
 
   @Post('send')
   async sendMessage(
-    @Request() req,
+    @Request() req: JwtUserReq,
     @Body('recipient') recipient: string,
     @Body('content') content: string,
   ) {
@@ -24,7 +28,7 @@ export class ChatController {
 
   @Post('group/send')
   async sendGroupMessage(
-    @Request() req,
+    @Request() req: JwtUserReq,
     @Body('groupId') groupId: string,
     @Body('content') content: string,
   ) {
@@ -35,7 +39,7 @@ export class ChatController {
 
   @Get('messages')
   async getMessages(
-    @Request() req,
+    @Request() req: JwtUserReq,
     @Query('with') withUser: string,
   ) {
     return this.chatService.getMessagesBetweenUsers(req.user.userId, withUser);

@@ -2,6 +2,10 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } f
 import { GroupService } from './group.service';
 import { AuthGuard } from '@nestjs/passport';
 
+interface JwtUserReq {
+  user: { userId: string; email: string; username: string };
+}
+
 @Controller('groups')
 @UseGuards(AuthGuard('jwt'))
 export class GroupController {
@@ -10,13 +14,13 @@ export class GroupController {
   @Post()
   async createGroup(
     @Body() data: { name: string; memberIds?: string[] },
-    @Request() req: any
+    @Request() req: JwtUserReq
   ) {
     return this.groupService.createGroup(data.name, req.user.userId, data.memberIds || []);
   }
 
   @Get()
-  async getUserGroups(@Request() req: any) {
+  async getUserGroups(@Request() req: JwtUserReq) {
     return this.groupService.getUserGroups(req.user.userId);
   }
 
@@ -29,7 +33,7 @@ export class GroupController {
   async addMemberToGroup(
     @Param('id') groupId: string,
     @Body() data: { userId: string },
-    @Request() req: any
+    @Request() req: JwtUserReq
   ) {
     return this.groupService.addMemberToGroup(groupId, data.userId, req.user.userId);
   }
@@ -38,7 +42,7 @@ export class GroupController {
   async removeMemberFromGroup(
     @Param('id') groupId: string,
     @Param('userId') userId: string,
-    @Request() req: any
+    @Request() req: JwtUserReq
   ) {
     return this.groupService.removeMemberFromGroup(groupId, userId, req.user.userId);
   }

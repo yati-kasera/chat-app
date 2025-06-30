@@ -7,6 +7,12 @@ class LoginDto {
   password: string;
 }
 
+interface JwtUser {
+  userId: string;
+  email: string;
+  username: string;
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -18,7 +24,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  getProfile(@Request() req) {
+  getProfile(@Request() req: { user: JwtUser }): JwtUser {
     return req.user;
   }
 }

@@ -3,6 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 
+interface UserResult {
+  _id: string;
+  email: string;
+  username: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -10,11 +16,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  async validateUser(email: string, password: string): Promise<UserResult | null> {
     const user = await this.usersService['userModel'].findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user.toObject();
-      return result;
+      const { password: _password, ...result } = user.toObject();
+      return result as UserResult;
     }
     return null;
   }
