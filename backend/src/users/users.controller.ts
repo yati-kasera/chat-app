@@ -22,6 +22,7 @@ export class UsersController {
   @Post('register')
   async register(@Body() body: RegisterDto): Promise<Omit<UserResult, 'password'>> {
     const user = await this.usersService.createUser(body.username, body.email, body.password) as UserDocument;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user.toJSON() as UserResult & { password?: string };
     return result;
   }
@@ -30,6 +31,7 @@ export class UsersController {
   async getAllUsers(): Promise<Omit<UserResult, 'password'>[]> {
     const users = await this.usersService.getAllUsers() as UserDocument[];
     return users.map((user) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = user.toJSON() as UserResult & { password?: string };
       return rest;
     });
@@ -41,6 +43,7 @@ export class UsersController {
     // req.user.userId is set by JwtStrategy
     const user = await this.usersService.findById(req.user.userId) as UserDocument | null;
     if (!user) return null;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user.toJSON() as UserResult & { password?: string };
     return result;
   }
