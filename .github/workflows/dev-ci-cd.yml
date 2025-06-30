@@ -72,8 +72,8 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:dev-${{ github.sha }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:dev-latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
 
   # Frontend Development CI
   frontend-dev:
@@ -120,8 +120,8 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:dev-${{ github.sha }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:dev-latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # cache-from: type=gha
+        # cache-to: type=gha,mode=max
 
   # Development Environment Summary
   deployment-summary:
