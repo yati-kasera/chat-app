@@ -104,7 +104,7 @@ export default function Home() {
       setSelectedUserIds([]);
       setGroupResult('Group created successfully!');
     } catch (err) {
-      setGroupResult('Failed to create group');
+       setGroupResult('Failed to create group');
     }
   };
 
