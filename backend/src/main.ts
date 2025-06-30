@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:8080', 'http://chat.local'], // allow both Ingress and port-forwarded frontend
+    origin: ['http://localhost:3000', 'http://chat.local'], // allow both Ingress and port-forwarded frontend
     credentials: true, // allow cookies/sessions
   });
 
