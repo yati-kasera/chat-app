@@ -109,7 +109,7 @@ export default function Home() {
   };
 
   const handleJoinGroup = (groupId: string) => {
-    router.push(`/chatwith?groupId=${groupId}&isGroup=true`);
+     router.push(`/chatwith?groupId=${groupId}&isGroup=true`);
   };
 
   return (
