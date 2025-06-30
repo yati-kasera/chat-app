@@ -136,7 +136,7 @@ export default function ChatWith() {
       const res = await axios.get(`http://localhost:3001/groups/${groupId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGroupInfo(res.data);
+       setGroupInfo(res.data);
     } catch (err: any) {
       console.error("Failed to fetch group info:", err);
     }
