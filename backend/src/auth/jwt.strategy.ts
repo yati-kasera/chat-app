@@ -45,14 +45,11 @@ interface JwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    // Explicitly type jwtFromRequest as (req: Request) => string | null
-    const jwtFromRequest: StrategyOptions['jwtFromRequest'] = ExtractJwt.fromAuthHeaderAsBearerToken();
-    const opts: StrategyOptions = {
-      jwtFromRequest,
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: 'SECRET_KEY', // TODO: use env variable
-    };
-    super(opts);
+    });
   }
 
   validate(payload: JwtPayload) {
