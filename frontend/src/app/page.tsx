@@ -1,29 +1,43 @@
 "use client"
 
-import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+// import Image from "next/image";
+// import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import io, { type Socket } from "socket.io-client";
+// import io, { type Socket } from "socket.io-client";
+import io from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+}
+
+interface Group {
+  _id: string;
+  name: string;
+  members: User[];
+  admin: string;
+}
 
 export default function Home() {
   const { user, token, login, register, logout } = useAuth();
-  const [registerData, setRegisterData] = useState({ username: '', email: '', password: '' });
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  // const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const [registerData, setRegisterData] = useState<{ username: string; email: string; password: string }>({ username: '', email: '', password: '' });
+  const [loginData, setLoginData] = useState<{ email: string; password: string }>({ email: '', password: '' });
   const [registerResult, setRegisterResult] = useState('');
   const [loginResult, setLoginResult] = useState('');
-  const [users, setUsers] = useState<any[]>([]);
-  const [groups, setGroups] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [fetchError, setFetchError] = useState('');
-  const [groupForm, setGroupForm] = useState({ name: '', memberIds: [] as string[] });
+  // const [groupForm, setGroupForm] = useState({ name: '', memberIds: [] as string[] });
+  const [groupForm, setGroupForm] = useState<{ name: string; memberIds: string[] }>({ name: '', memberIds: [] });
   const [groupResult, setGroupResult] = useState('');
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const router = useRouter();
-
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   // useEffect(() => {
   //   if (token) {
@@ -45,7 +59,7 @@ export default function Home() {
       axios.get('http://localhost:3001/users', {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then(res => setUsers(res.data.filter((u: any) => u.email !== user?.email)))
+        .then(res => setUsers(res.data.filter((u: User) => u.email !== user?.email)))
         .catch(err => setFetchError(err.response?.data?.message || 'Failed to fetch users'));
 
       // Fetch user's groups
@@ -63,8 +77,8 @@ export default function Home() {
     try {
       await register(registerData.username, registerData.email, registerData.password);
       setRegisterResult('Registered!');
-    } catch (err: any) {
-      setRegisterResult(err.response?.data?.message || 'Registration failed');
+    } catch (err: unknown) {
+      setRegisterResult((err as any)?.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -74,12 +88,12 @@ export default function Home() {
     try {
       await login(loginData.email, loginData.password);
       setLoginResult('Login successful!');
-    } catch (err: any) {
-      setLoginResult(err.response?.data?.message || 'Login failed');
+    } catch (err: unknown) {
+      setLoginResult((err as any)?.response?.data?.message || 'Login failed');
     }
   };
 
-  const handleChatWith = (recipient: any) => {
+  const handleChatWith = (recipient: User) => {
     router.push(`/chatwith?recipientId=${recipient._id}&recipientName=${encodeURIComponent(recipient.username)}`);
   };
 
@@ -103,8 +117,8 @@ export default function Home() {
       setGroupForm({ name: '', memberIds: [] });
       setSelectedUserIds([]);
       setGroupResult('Group created successfully!');
-    } catch (err) {
-        setGroupResult('Failed to create group');
+    } catch {
+      setGroupResult('Failed to create group');
     }
   };
 
@@ -198,14 +212,16 @@ export default function Home() {
                 <ul className="divide-y divide-gray-200">
                   {groups.map((group) => (
                     <li key={group._id} className="flex items-center gap-4 justify-between py-2">
-                      <div>
+                      {/* <div>
                         <span className="font-medium">{group.name}</span>
                         <div className="text-sm text-gray-600">
                           {group.members?.length || 0} members
                         </div>
                       </div>
-                      {/* <button onClick={() => handleJoinGroup(group._id)} className="bg-green-600 text-white rounded p-2">Join Chat</button> */}
-                      <Button onClick={() => handleJoinGroup(group._id)} >Join Chat</Button>
+                     
+                      <Button onClick={() => handleJoinGroup(group._id)} >Join Chat</Button> */}
+                      <span>{group.name}</span>
+                      <Button onClick={() => handleJoinGroup(group._id)} >Join</Button>
                     </li>
                   ))}
                 </ul>
