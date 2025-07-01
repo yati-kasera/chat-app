@@ -120,7 +120,7 @@ jobs:
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:dev-${{ github.sha }}
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:dev-latest
-        # cache-from: type=gha
+        cache-from: type=gha
         # cache-to: type=gha,mode=max
 
   # Development Environment Summary
