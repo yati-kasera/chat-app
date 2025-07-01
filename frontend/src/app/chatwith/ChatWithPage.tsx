@@ -472,6 +472,7 @@ export default function ChatWithPage() {
                         setSelectedUserId("");
                         fetchGroupInfo();
                       } catch (error) {
+                        console.error(error);
                         alert("Failed to add member");
                       }
                     }}

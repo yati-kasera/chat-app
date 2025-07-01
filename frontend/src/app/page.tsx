@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 // import io, { type Socket } from "socket.io-client";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -77,8 +77,16 @@ export default function Home() {
     try {
       await register(registerData.username, registerData.email, registerData.password);
       setRegisterResult('Registered!');
-    } catch (err: unknown) {
-      setRegisterResult((err as any)?.response?.data?.message || 'Registration failed');
+    }
+    //  catch (err: unknown) {
+    //   setRegisterResult((err as any)?.response?.data?.message || 'Registration failed');
+    // }
+    catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setRegisterResult(err.response?.data?.message || 'Registration failed');
+      } else {
+        setRegisterResult('Registration failed');
+      }
     }
   };
 
@@ -88,8 +96,15 @@ export default function Home() {
     try {
       await login(loginData.email, loginData.password);
       setLoginResult('Login successful!');
-    } catch (err: unknown) {
-      setLoginResult((err as any)?.response?.data?.message || 'Login failed');
+    } 
+    catch (err: unknown) {
+      // setLoginResult((err as any)?.response?.data?.message || 'Login failed');
+
+      if (axios.isAxiosError(err)) {
+        setLoginResult(err.response?.data?.message || 'Registration failed');
+      } else {
+        setLoginResult('Registration failed');
+      }
     }
   };
 
