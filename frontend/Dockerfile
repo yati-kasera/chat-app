@@ -1,20 +1,21 @@
-# Use Node.js LTS as the base image
-FROM node:18
+# builder stage
+FROM node:18 AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
 
-# Set the working directory
+# runner stage
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Copy package.json and package-lock.json
 COPY package*.json ./
+RUN npm install --omit=dev
 
-# Install dependencies
-RUN npm install
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.ts ./next.config.ts
 
-# Copy the rest of the application code
-COPY . .
-
-# Expose the port the app runs on
 EXPOSE 3000
-
-# Start the app in development mode
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

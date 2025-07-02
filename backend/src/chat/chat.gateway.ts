@@ -84,7 +84,7 @@
 
 
 
-import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, MessageBody, WebSocketServer, OnGatewayConnection, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { Injectable } from '@nestjs/common';
@@ -122,12 +122,21 @@ export class ChatGateway implements OnGatewayConnection {
     void this.server.to(data.groupId).emit('group-message', populatedMessage.toObject());
   }
 
+  // @SubscribeMessage('join-group')
+  // handleJoinGroup(
+  //   @MessageBody() data: { userId: string; groupId: string }
+  // ) {
+  //   void this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
+  // }
+
   @SubscribeMessage('join-group')
-  handleJoinGroup(
-    @MessageBody() data: { userId: string; groupId: string }
-  ) {
-    void this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
-  }
+handleJoinGroup(
+  @MessageBody() data: { userId: string; groupId: string },
+  @ConnectedSocket() client: Socket
+) {
+  client.join(data.groupId); // <-- This is required!
+  void this.server.to(data.groupId).emit('user-joined-group', { userId: data.userId, groupId: data.groupId });
+}
 
   @SubscribeMessage('leave-group')
   handleLeaveGroup(

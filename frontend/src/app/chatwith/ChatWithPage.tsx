@@ -245,7 +245,7 @@ interface Message {
   recipient?: string;
   group?: string;
   content: string;
-  timestamp: Date;
+  createdAt?: string; // <-- Add this
 }
 
 interface GroupInfo {
@@ -270,6 +270,11 @@ interface SocketMessage {
   content: string;
 }
 
+interface Sender {
+  _id: string;
+  username: string;
+}
+
 export default function ChatWithPage() {
   const { user, token } = useAuth();
   const searchParams = useSearchParams();
@@ -283,6 +288,7 @@ export default function ChatWithPage() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const chatId = isGroup ? groupId : recipientId;
 
@@ -345,6 +351,10 @@ export default function ChatWithPage() {
     }
   }, [token]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -370,6 +380,10 @@ export default function ChatWithPage() {
     } catch (error: unknown) {
       console.error("Send failed:", error);
     }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const fetchMessages = async () => {
@@ -408,6 +422,15 @@ export default function ChatWithPage() {
 
   const isAdmin = isGroup && groupInfo && String(groupInfo.admin) === String(user?._id);
 
+  function isSenderObject(sender: unknown): sender is Sender {
+    return (
+      !!sender &&
+      typeof sender === 'object' &&
+      '_id' in sender &&
+      'username' in sender
+    );
+  }
+
   if (!token) {
     return <div className="p-8">Please login to chat.</div>;
   }
@@ -421,7 +444,7 @@ export default function ChatWithPage() {
         <div className="flex flex-row w-full max-w-3xl gap-4">
           {/* Sidebar for group members */}
           {isGroup && groupInfo && (
-            <aside className="w-48 min-w-[150px] bg-gray-100 border rounded p-2 h-84">
+            <aside className="w-48 min-w-[150px] bg-gray-100 border rounded p-2 h-auto">
               <h3 className="font-bold text-black mb-2 text-sm">Group Members</h3>
               <ul className="text-sm">
                 {groupInfo.members?.map((member) => (
@@ -497,7 +520,7 @@ export default function ChatWithPage() {
                     </select>
                     <button
                       type="submit"
-                      className="text-xs text-white bg-blue-600 px-2 py-1 rounded"
+                      className="text-xs text-white bg-gray-900 px-2 py-1 rounded"
                       disabled={!selectedUserId}
                     >
                       Add
@@ -533,34 +556,43 @@ export default function ChatWithPage() {
                 <div className="text-gray-400 text-center">No messages yet.</div>
               ) : (
                 <ul className="space-y-2">
-                  {messages.map((msg) => (
-                    <li
-                      key={msg._id}
-                      className={`flex flex-col ${
-                        msg.sender === user?._id ? "items-end" : "items-start"
-                      }`}
-                    >
-                      <div
-                        className={`px-3 py-2 rounded-lg max-w-xs break-words ${
-                          msg.sender === user?._id
-                            ? "bg-blue-100 text-blue-900"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
+                  {messages.map((msg) => {
+                    let senderId = isSenderObject(msg.sender) ? msg.sender._id : msg.sender;
+                    const isOwnMessage = senderId === user?._id;
+                    return (
+                      <li
+                        key={msg._id}
+                        className={`flex  flex-col ${isOwnMessage ? "items-end" : "items-start"}`}
                       >
-                        <span className="block">{msg.content}</span>
-                      </div>
-                      <span className="text-xs text-gray-400 mt-1">
-                        {msg.sender === user?._id ? "You" : ""}
-                        {msg.sender !== user?._id &&
-                          users.find((u) => u._id === msg.sender)?.username}
-                        {" "}
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </li>
-                  ))}
+                        <div
+                          className={`px-2 py-2  rounded-lg max-w-xs break-words ${
+                            isOwnMessage
+                              ? "bg-blue-900 text-white"
+                              : "bg-gray-200 text-gray-900"
+                          }`}
+                        >
+                           <span className="text-xs text-gray-700">
+                           {isOwnMessage
+                              ? "You"
+                              : isSenderObject(msg.sender)
+                                ? msg.sender.username
+                                : users.find((u) => u._id === msg.sender)?.username}
+                          </span>
+                           
+                          <span className="block">{msg.content}</span>
+                          <span className="text-[10px] text-gray-400">
+                            {msg.createdAt
+                              ? new Date(msg.createdAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : ""}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                   <div ref={messagesEndRef} />
                 </ul>
               )}
             </div>
@@ -581,7 +613,7 @@ export default function ChatWithPage() {
               />
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                className="bg-gray-800 text-white px-4 py-2 rounded text-sm"
                 disabled={!message.trim()}
               >
                 Send
