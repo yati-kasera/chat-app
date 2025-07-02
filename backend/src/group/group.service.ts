@@ -58,7 +58,7 @@ export class GroupService {
       } else {
         console.error('Create group error:', error);
       }
-      throw error; // This will still return 500, but now you'll see the real error in your logs
+       throw error; // This will still return 500, but now you'll see the real error in your logs
     }
   }
 
