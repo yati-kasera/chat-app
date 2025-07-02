@@ -52,9 +52,13 @@ export class GroupService {
       }
   
       return savedGroup;
-    } catch (err) {
-      console.error('Create group error:', err);
-      throw err; // This will still return 500, but now you'll see the real error in your logs
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Create group error:', error.message);
+      } else {
+        console.error('Create group error:', error);
+      }
+      throw error; // This will still return 500, but now you'll see the real error in your logs
     }
   }
 
