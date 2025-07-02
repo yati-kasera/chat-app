@@ -9,7 +9,8 @@ import { GroupModule } from './group/group.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/chat' || 'mongodb://mongo:27017/chat'),
+    // MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/chat'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://mongo:27017/chat'),
     UsersModule,
     AuthModule,
     ChatModule,

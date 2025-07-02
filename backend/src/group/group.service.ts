@@ -41,8 +41,12 @@ export class GroupService {
               groupId: savedGroup._id,
               groupName: name,
             });
-          } catch (err) {
-            console.error('n8n webhook error:', err.message);
+          } catch (error: unknown) {
+            if (error instanceof Error) {
+              console.error('Failed to notify n8n for user', user.email, error.message);
+            } else {
+              console.error('Failed to notify n8n for user', user.email, error);
+            }
           }
         }
       }
@@ -77,12 +81,19 @@ export class GroupService {
     // Fetch user details
     const user = await this.usersService.findById(userId);
     if (user && user.email) {
-      // Send webhook to n8n
-      await axios.post('https://yatiii.app.n8n.cloud/webhook/user-added-to-group', {
-        email: user.email,
-        groupId,
-        groupName: group.name,
-      });
+      try {
+        await axios.post('https://yatiii.app.n8n.cloud/webhook/user-added-to-group', {
+          email: user.email,
+          groupId,
+          groupName: group.name,
+        });
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Failed to notify n8n for user', user.email, error.message);
+        } else {
+          console.error('Failed to notify n8n for user', user.email, error);
+        }
+      }
     }
 
     return updatedGroup;
