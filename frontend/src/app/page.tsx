@@ -26,10 +26,6 @@ interface Group {
 export default function Home() {
   const { user, token, login, register, logout } = useAuth();
   // const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const [registerData, setRegisterData] = useState<{ username: string; email: string; password: string }>({ username: '', email: '', password: '' });
-  const [loginData, setLoginData] = useState<{ email: string; password: string }>({ email: '', password: '' });
-  const [registerResult, setRegisterResult] = useState('');
-  const [loginResult, setLoginResult] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [fetchError, setFetchError] = useState('');
@@ -71,42 +67,11 @@ export default function Home() {
     }
   }, [token, user]);
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRegisterResult('');
-    try {
-      await register(registerData.username, registerData.email, registerData.password);
-      setRegisterResult('Registered!');
+  useEffect(() => {
+    if (!token) {
+      router.replace('/welcome');
     }
-    //  catch (err: unknown) {
-    //   setRegisterResult((err as any)?.response?.data?.message || 'Registration failed');
-    // }
-    catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setRegisterResult(err.response?.data?.message || 'Registration failed');
-      } else {
-        setRegisterResult('Registration failed');
-      }
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginResult('');
-    try {
-      await login(loginData.email, loginData.password);
-      setLoginResult('Login successful!');
-    } 
-    catch (err: unknown) {
-      // setLoginResult((err as any)?.response?.data?.message || 'Login failed');
-
-      if (axios.isAxiosError(err)) {
-        setLoginResult(err.response?.data?.message || 'Registration failed');
-      } else {
-        setLoginResult('Registration failed');
-      }
-    }
-  };
+  }, [token, router]);
 
   const handleChatWith = (recipient: User) => {
     router.push(`/chatwith?recipientId=${recipient._id}&recipientName=${encodeURIComponent(recipient.username)}`);
@@ -145,25 +110,7 @@ export default function Home() {
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <div className="flex flex-col gap-8 w-full max-w-md">
-          {!token && (
-            <>
-              <form onSubmit={handleRegister} className="flex flex-col gap-2 p-4 border rounded">
-                <h2 className="font-bold">Register</h2>
-                <input type="text" placeholder="Username" value={registerData.username} onChange={e => setRegisterData({ ...registerData, username: e.target.value })} required className="border p-1 rounded" />
-                <input type="email" placeholder="Email" value={registerData.email} onChange={e => setRegisterData({ ...registerData, email: e.target.value })} required className="border p-1 rounded" />
-                <input type="password" placeholder="Password" value={registerData.password} onChange={e => setRegisterData({ ...registerData, password: e.target.value })} required className="border p-1 rounded" />
-                <button type="submit" className="bg-gray-800 text-white rounded p-2 mt-2">Register</button>
-                {registerResult && <div className="text-sm mt-1">{registerResult}</div>}
-              </form>
-              <form onSubmit={handleLogin} className="flex flex-col gap-2 p-4 border rounded">
-                <h2 className="font-bold">Login</h2>
-                <input type="email" placeholder="Email" value={loginData.email} onChange={e => setLoginData({ ...loginData, email: e.target.value })} required className="border p-1 rounded" />
-                <input type="password" placeholder="Password" value={loginData.password} onChange={e => setLoginData({ ...loginData, password: e.target.value })} required className="border p-1 rounded" />
-                <button type="submit" className="bg-gray-800 text-white rounded p-2 mt-2">Login</button>
-                {loginResult && <div className="text-sm mt-1">{loginResult}</div>}
-              </form>
-            </>
-          )}
+          {/* Login/Register forms removed. Only show main app if authenticated. */}
           {token && (
             <>
               <div className="flex flex-col gap-2 p-4 border rounded">
@@ -227,14 +174,6 @@ export default function Home() {
                 <ul className="divide-y divide-gray-200">
                   {groups.map((group) => (
                     <li key={group._id} className="flex items-center gap-4 justify-between py-2">
-                      {/* <div>
-                        <span className="font-medium">{group.name}</span>
-                        <div className="text-sm text-gray-600">
-                          {group.members?.length || 0} members
-                        </div>
-                      </div>
-                     
-                      <Button onClick={() => handleJoinGroup(group._id)} >Join Chat</Button> */}
                       <span>{group.name}</span>
                       <Button onClick={() => handleJoinGroup(group._id)} >Join</Button>
                     </li>
@@ -247,6 +186,11 @@ export default function Home() {
           )}
         </div>
       </main>
+      <div className="fixed bottom-4 left-0 w-full flex justify-center z-50">
+        <Button className="px-8 py-3 text-lg" onClick={() => router.push('/chat')}>
+          Go to New Chat Layout
+        </Button>
+      </div>
     </div>
   );
 }
