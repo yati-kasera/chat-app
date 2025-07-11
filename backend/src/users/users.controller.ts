@@ -2,6 +2,7 @@ import { Body, Controller, Post, Get, Request, UseGuards } from '@nestjs/common'
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserDocument } from './user.schema';
+import { ChatGateway } from '../chat/chat.gateway';
 
 class RegisterDto {
   username: string;
@@ -17,7 +18,10 @@ interface UserResult {
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly chatGateway: ChatGateway
+  ) {}
 
   @Post('register')
   async register(@Body() body: RegisterDto): Promise<Omit<UserResult, 'password'>> {
@@ -35,6 +39,11 @@ export class UsersController {
       const { password, ...rest } = user.toJSON() as UserResult & { password?: string };
       return rest;
     });
+  }
+
+  @Get('online')
+  async getOnlineUsers(): Promise<string[]> {
+    return this.chatGateway.getOnlineUsers();
   }
 
   @UseGuards(AuthGuard('jwt'))

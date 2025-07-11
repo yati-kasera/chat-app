@@ -167,3 +167,13 @@ kubeconfig.yaml
 # Misc
 *.tgz
 *.tar.gz 
+
+# Ignore Kubernetes manifests
+k8s/
+
+# Ignore common CI/CD config files
+.github/
+.gitlab-ci.yml
+.circleci/
+.travis.yml
+azure-pipelines.yml 
